@@ -5,5 +5,4 @@ export default defineNuxtConfig({
     buildModules: [
         'nuxt-windicss',
     ],
-    ssr: false
 })
