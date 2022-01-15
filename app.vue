@@ -144,7 +144,6 @@
 </template>
 
 <style scoped>
-
 /* windicss layer base */
 *, ::before, ::after {
   box-sizing: border-box;
