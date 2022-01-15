@@ -143,7 +143,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 
 /* windicss layer base */
 *, ::before, ::after {
