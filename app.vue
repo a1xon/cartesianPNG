@@ -19,10 +19,12 @@
         <span v-if="exporting === 'generating'">
           <h2
             class="font-medium text-lg"
-          >Generating {{ savedImages }} / {{ possibleCombinations }} ...</h2>
+          >Generating {{ generatedImages }} / {{ possibleCombinations }} ...</h2>
         </span>
         <span v-if="exporting === 'zipping'">
-          <h2 class="font-medium text-lg">Generating zip file, please wait (~1min)...</h2>
+          <h2 class="font-medium text-lg">Generating zip file, please wait ...</h2>
+          {{zipCurrentFile}}<br>
+          {{zippedImagesPercent }}
         </span>
         <span v-if="exporting === 'downloading'">
           <h2 class="font-medium text-lg">Download ...</h2>
@@ -137,7 +139,7 @@
     </div>
     <div>
       <h2 class="text-lg font-semibold">Example Image</h2>
-      <img v-if="possibleCombinations <= 1"  src="~/assets/img/start_here.png" class="start-img"/>
+      <img v-if="possibleCombinations <= 1" src="~/assets/img/start_here.png" class="start-img" />
       <canvas id="exampleCanvas"></canvas>
     </div>
   </div>
@@ -163,7 +165,9 @@ export default {
     let exampleCanvas;
     let exampleCtx;
     let exporting = ref("");
-    let savedImages = ref(0);
+    let generatedImages = ref(0);
+    let zippedImagesPercent = ref("");
+    let zipCurrentFile = ref("");
     const layers = reactive([new Layer("Layer #0")]);
 
     onMounted(() => {
@@ -229,7 +233,7 @@ export default {
     const generateAllImages = async () => {
       const zip = new JSZip();
       exporting.value = "generating";
-      savedImages.value = 0;
+      generatedImages.value = 0;
       for (const imageSet of allCombinations.value) {
         clearCtx();
         for (const image of imageSet) {
@@ -241,15 +245,27 @@ export default {
           exampleCanvas.toBlob((blob) => {
             const filename = [...Array(30)].map(() => Math.random().toString(36)[2]).join('');
             zip.file(`${filename}.png`, blob);
-            savedImages.value++;
-            resolve(savedImages.value);
+            generatedImages.value++;
+            resolve(generatedImages.value);
           }, 'image/png');
         })
       }
       exporting.value = "zipping";
       const d = new Date();
       const dateString = d.toLocaleString().replace(/\.:, /ig, '_');
-      zip.generateAsync({ type: "blob" }).then(async (blob) => {
+      zip.generateAsync({
+        type: "blob", compression: "DEFLATE",
+        compressionOptions: {
+          level: 1
+        }
+      },
+        function updateCallback (metadata) {
+          zippedImagesPercent.value = `${metadata.percent.toFixed(2)}  %`;
+          if (metadata.currentFile) {
+            zipCurrentFile.value = metadata.currentFile;
+          }
+        }
+      ).then(async (blob) => {
         exporting.value = "downloading";
         await saveAs(blob, `cartesianPNG_${dateString}.zip`);
         exporting.value = "";
@@ -295,7 +311,7 @@ export default {
         layer.name = layer.name.replace(/^(Layer #)(?:\d+?)/i, `$1${index}`);
       }
     }
-    return { layers, addLayer, addImagesToLayer, removeLayer, moveLayer, possibleCombinations, allCombinations, generateAllImages, exporting, savedImages }
+    return { layers, addLayer, addImagesToLayer, removeLayer, moveLayer, possibleCombinations, allCombinations, generateAllImages, exporting, generatedImages, zippedImagesPercent, zipCurrentFile }
   }
 }
 
