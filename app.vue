@@ -7,7 +7,7 @@
       <div class="container mx-auto text-center py-5">
         <button
           class="mx-2 px-6 py-2 bg-sky-500 font-medium text-sm hover:bg-sky-600 text-sky-100 rounded"
-          v-if="!exporting"
+          v-if="!exporting && !layers.some(l => l.images.length === 0)"
           @click="addLayer()"
         >+ New Layer</button>
         <button
@@ -22,7 +22,7 @@
           >Generating {{ savedImages }} / {{ possibleCombinations }} ...</h2>
         </span>
         <span v-if="exporting === 'zipping'">
-          <h2 class="font-medium text-lg">Packing zip file ...</h2>
+          <h2 class="font-medium text-lg">Generating zip file, please wait (~1min)...</h2>
         </span>
         <span v-if="exporting === 'downloading'">
           <h2 class="font-medium text-lg">Download ...</h2>
