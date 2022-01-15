@@ -6,4 +6,6 @@ export default defineNuxtConfig({
         'nuxt-windicss',
     ] */
     css: ['@/assets/css/main.css'],
+    target: "static",
+    ssr: false
 })
