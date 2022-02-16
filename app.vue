@@ -23,8 +23,9 @@
         </span>
         <span v-if="exporting === 'zipping'">
           <h2 class="font-medium text-lg">Generating zip file, please wait ...</h2>
-          {{zipCurrentFile}}<br>
-          {{zippedImagesPercent }}
+          {{ zipCurrentFile }}
+          <br />
+          {{ zippedImagesPercent }}
         </span>
         <span v-if="exporting === 'downloading'">
           <h2 class="font-medium text-lg">Download ...</h2>
@@ -71,64 +72,27 @@
               </p>
             </div>
             <div class="m-2">
-              <svg
+              <img
+                class="control"
+                src="./assets/img/arrow_up.svg"
                 v-if="index !== layers.length - 1"
                 @click="moveLayer(index, 1)"
-                aria-hidden="true"
-                focusable="false"
-                data-prefix="far"
-                data-icon="arrow-alt-circle-up"
-                class="w-5 h-5"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  fill="currentColor"
-                  d="M256 504c137 0 248-111 248-248S393 8 256 8 8 119 8 256s111 248 248 248zm0-448c110.5 0 200 89.5 200 200s-89.5 200-200 200S56 366.5 56 256 145.5 56 256 56zm20 328h-40c-6.6 0-12-5.4-12-12V256h-67c-10.7 0-16-12.9-8.5-20.5l99-99c4.7-4.7 12.3-4.7 17 0l99 99c7.6 7.6 2.2 20.5-8.5 20.5h-67v116c0 6.6-5.4 12-12 12z"
-                />
-              </svg>
-              <svg
+              />
+              <img
+                class="control"
+                src="./assets/img/arrow_down.svg"
                 v-if="index !== 0"
                 @click="moveLayer(index, -1)"
-                aria-hidden="true"
-                focusable="false"
-                data-prefix="far"
-                data-icon="arrow-alt-circle-down"
-                class="w-5 h-5"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 512 512"
-              >
-                <path
-                  fill="currentColor"
-                  d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm-32-316v116h-67c-10.7 0-16 12.9-8.5 20.5l99 99c4.7 4.7 12.3 4.7 17 0l99-99c7.6-7.6 2.2-20.5-8.5-20.5h-67V140c0-6.6-5.4-12-12-12h-40c-6.6 0-12 5.4-12 12z"
-                />
-              </svg>
+              />
               <br />
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                data-prefix="far"
-                data-icon="times-circle"
-                class="w-5 h-5"
-                role="img"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 512 512"
-                @click="removeLayer(index)"
-              >
-                <path
-                  fill="currentColor"
-                  d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm0 448c-110.5 0-200-89.5-200-200S145.5 56 256 56s200 89.5 200 200-89.5 200-200 200zm101.8-262.2L295.6 256l62.2 62.2c4.7 4.7 4.7 12.3 0 17l-22.6 22.6c-4.7 4.7-12.3 4.7-17 0L256 295.6l-62.2 62.2c-4.7 4.7-12.3 4.7-17 0l-22.6-22.6c-4.7-4.7-4.7-12.3 0-17l62.2-62.2-62.2-62.2c-4.7-4.7-4.7-12.3 0-17l22.6-22.6c4.7-4.7 12.3-4.7 17 0l62.2 62.2 62.2-62.2c4.7-4.7 12.3-4.7 17 0l22.6 22.6c4.7 4.7 4.7 12.3 0 17z"
-                />
-              </svg>
+              <img class="control" src="./assets/img/close.svg" @click="removeLayer(index)" />
             </div>
           </div>
           <section class="py-8 px-4">
             <div class="flex flex-wrap justify-start -mx-4 -mb-8">
               <div
                 class="w-1/4 sm:w-1/8 md:w-1/12 mx-3 flex flex-wrap content-center"
-                v-for="(image, index) in layer?.images"
+                v-for="image of layer?.images"
               >
                 <img class="rounded shadow-md" :src="image.src" />
               </div>
@@ -145,6 +109,13 @@
   </div>
 </template>
 
+<style scoped>
+.control {
+  width: 25px;
+  height: 25px;
+}
+</style>
+
 
 <script>
 import JSZip from "jszip";
@@ -159,9 +130,8 @@ class Layer {
   }
 }
 
-
 export default {
-  setup(props) {
+  setup() {
     let exampleCanvas;
     let exampleCtx;
     let exporting = ref("");
@@ -176,6 +146,7 @@ export default {
       exampleCanvas.height = 1;
       exampleCtx = exampleCanvas.getContext("2d");
     });
+
     const addImageToCanvas = (image) => {
       if (!image) {
         return;
@@ -186,6 +157,7 @@ export default {
       }
       exampleCtx.drawImage(image, 0, 0);
     }
+
     const addImagesToLayer = async ($event, index) => {
       layers[index].images = [];
       let allImagesLoadedPromise = [];
@@ -193,7 +165,7 @@ export default {
         const image = new Image();
         image.src = URL.createObjectURL(file);
         layers[index].images.push(image);
-        allImagesLoadedPromise.push(new Promise(function (resolve, reject) {
+        allImagesLoadedPromise.push(new Promise((resolve) => {
           image.onload = resolve;
         }));
       }
@@ -241,7 +213,7 @@ export default {
             addImageToCanvas(image);
           }
         }
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
           exampleCanvas.toBlob((blob) => {
             const filename = [...Array(30)].map(() => Math.random().toString(36)[2]).join('');
             zip.file(`${filename}.png`, blob);
@@ -259,7 +231,7 @@ export default {
           level: 1
         }
       },
-        function updateCallback (metadata) {
+        (metadata) => {
           zippedImagesPercent.value = `${metadata.percent.toFixed(2)}  %`;
           if (metadata.currentFile) {
             zipCurrentFile.value = metadata.currentFile;
@@ -293,6 +265,10 @@ export default {
         return all *= curr.images.length > 0 ? curr.images.length + (~~curr.optional) : 1;
       }, ~~!!layers.length);
     })
+
+    /// Layer logic
+    /// Layer logic
+    /// Layer logic
 
     const addLayer = () => {
       layers.push(new Layer(`Layer #${layers.length}`))
